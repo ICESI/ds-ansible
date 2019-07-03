@@ -1,0 +1,57 @@
+swagger: '2.0'
+
+info:
+  title: User API
+  version: "0.3.0"
+
+paths:
+  /users/{username}:
+    get:
+      x-swagger-router-controller: gm_analytics
+      operationId: handlers.get_user_info
+      summary: Returns user information.
+      parameters:
+        - name: username
+          in: path
+          required: true
+          type: string
+          format: path
+      responses:
+        200:
+          description: Successful response.
+          schema:
+            type: object
+            properties:
+              user_info:
+                type: string
+                description: User information
+  /users/{username}/commits:
+    get:
+      x-swagger-router-controller: gm_analytics
+      operationId: handlers.get_commits_info
+      summary: Returns user information.
+      parameters:
+        - name: username
+          in: path
+          required: true
+          type: string
+          format: path
+        - name: time_range
+          in: query
+          type: string
+      responses:
+        200:
+          description: Successful response.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Item'
+
+definitions:
+  Item:
+    type: object
+    properties:
+      commits_count:
+        type: integer
+      yyyymmdd_date:
+        type: string

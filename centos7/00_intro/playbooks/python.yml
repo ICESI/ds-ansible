@@ -1,0 +1,71 @@
+---
+- hosts: appServer
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Install a list of packages
+      yum:
+        name:
+          - python36
+          - python36-pip
+        state: present
+
+- hosts: appServer
+  become: yes
+  become_user: vagrant
+  tasks:
+    - name: Creates directory
+      file:
+        path: /home/vagrant/app_simple
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: u=rw,g=r,o=r
+    - name: Copy artifact
+      copy: 
+        src: ../templates/app_simple/ 
+        dest: /home/vagrant/app_simple/ 
+        remote_src: no
+        directory_mode: yes
+        owner: vagrant
+        group: vagrant
+        mode: u=rw,g=r,o=r
+
+    # needs rsync
+    # - synchronize: 
+    #     src: ../templates/app
+    #     dest: /home/vagrant/
+
+- hosts: appServer
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Copy configuration
+      copy: 
+        src: ../templates/config/app.service
+        dest: /etc/systemd/system/app.service
+        remote_src: no
+    - name: start app 
+      service:
+        name: app
+        state: started
+
+
+# /etc/nginx/sites-available/myproject
+# server {
+#     listen 80;
+#     server_name your_domain www.your_domain;
+
+#     location / {
+#         include uwsgi_params;
+#         uwsgi_pass unix:/home/sammy/myproject/myproject.sock;
+#     }
+# }
+
+# sudo ln -s /etc/nginx/sites-available/myproject /etc/nginx/sites-enabled
+
+# sudo nginx -t
+
+# sudo systemctl restart nginx

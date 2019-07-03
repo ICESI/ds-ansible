@@ -1,0 +1,12 @@
+[Unit]
+Description=uWSGI instance to serve app
+After=network.target
+
+[Service]
+User=vagrant
+Group=www-data
+WorkingDirectory=/home/vagrant/app
+ExecStart=/home/vagrant/app/appenv/bin/uwsgi --ini app.ini
+
+[Install]
+WantedBy=multi-user.target

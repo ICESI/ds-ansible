@@ -1,0 +1,6 @@
+-rrequirements.txt
+pytest
+pytest-mock
+pylint
+flake8
+mock

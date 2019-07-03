@@ -39,6 +39,17 @@ Restart nginx
 sudo systemctl restart nginx
 ```
 
+Test https
+```
+...
+```
+
+Install app and run with wsgi
+```
+...
+uwsgi --socket 0.0.0.0:5000 --protocol=http -w wsgi:app
+```
+
 ### Ansible process
 
 pip install --user ansible
@@ -46,7 +57,8 @@ pip install --user paramiko
 
 ```
 vagrant up
-ansible-playbook playbooks/nginxServer.yml
+ansible-playbook -i hosts playbooks/nginx.yml
+ansible-playbook -i hosts playbooks/python.yml
 ```
 
 ### Troubleshoot (MacOS)
@@ -81,6 +93,6 @@ https://github.com/hashicorp/vagrant/issues/1671
 ```
 
 ### References
-```
-https://letsencrypt.org/
-``
+
+* https://letsencrypt.org/
+* https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uswgi-and-nginx-on-ubuntu-18-04

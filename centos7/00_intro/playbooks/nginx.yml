@@ -1,6 +1,8 @@
 ---
-- hosts: nginxServer
-  sudo: yes
+- hosts: appServer
+  become: yes
+  become_user: root
+  become_method: sudo
   tasks:
     - name: install nginx
       yum: 
