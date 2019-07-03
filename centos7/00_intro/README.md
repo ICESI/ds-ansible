@@ -96,3 +96,6 @@ https://github.com/hashicorp/vagrant/issues/1671
 
 * https://letsencrypt.org/
 * https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uswgi-and-nginx-on-ubuntu-18-04
+* https://docs.ansible.com/ansible/latest/modules/ec2_module.html
+* https://www.linuxschoolonline.com/use-ansible-to-build-and-manage-aws-ec2-instances/
+* https://arkit.co.in/aws-ec2-instance-creation-using-ansible/
