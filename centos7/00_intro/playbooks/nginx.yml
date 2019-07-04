@@ -20,7 +20,7 @@
       template: src=../templates/static/index.html
         dest=/usr/share/nginx/html/index.html
         backup=yes
-    - name: restart haproxy
+    - name: restart nginx
       service:
         name: nginx 
         state: restarted

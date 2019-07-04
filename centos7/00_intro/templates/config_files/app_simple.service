@@ -1,0 +1,12 @@
+[Unit]
+Description=uWSGI instance to serve app
+After=network.target
+
+[Service]
+User=vagrant
+Group=vagrant
+WorkingDirectory=/home/vagrant/app_simple
+ExecStart=/home/vagrant/.local/bin/uwsgi --ini app_simple.ini --uid vagrant --gid vagrant
+
+[Install]
+WantedBy=multi-user.target

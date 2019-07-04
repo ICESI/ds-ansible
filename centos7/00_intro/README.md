@@ -39,15 +39,112 @@ Restart nginx
 sudo systemctl restart nginx
 ```
 
-Test https
+Run test with https
 ```
-...
+curl https://domain.com
 ```
 
-Install app and run with wsgi
+Create app_simple.py
 ```
-...
+from flask import Flask
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return "<h1 style='color:blue'>Hello There!</h1>"
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
+```
+
+Install requirements
+```
+pip install flask
+pip install uwsgi
+```
+
+Run app_simple.py with python
+```
+python app.py
+curl 127.0.0.1:5000
+```
+
+Create uwsgi.py
+```
+from app_simple import app
+
+if __name__ == "__main__":
+    app.run()
+```
+
+Run app with uwsgi
+```
 uwsgi --socket 0.0.0.0:5000 --protocol=http -w wsgi:app
+curl 127.0.0.1:5000
+```
+
+Create app_simple.ini uwsgi file
+```
+[uwsgi]
+module = wsgi:app
+
+master = true
+processes = 5
+
+socket = app_simple.sock
+chmod-socket = 660
+vacuum = true
+
+die-on-term = true
+```
+
+Run app with uwsgi and ini file. Validate that the output of the command is similar to the previous
+uwsgi execution
+```
+uwsgi --ini app_simple.ini
+```
+
+Create a systemd service for launching app_simple 
+/etc/systemd/system/app_simple.service
+```
+[Unit]
+Description=uWSGI instance to serve app
+After=network.target
+
+[Service]
+User=vagrant
+Group=vagrant
+WorkingDirectory=/home/vagrant/app_simple
+ExecStart=/home/vagrant/.local/bin/uwsgi --ini app_simple.ini --uid vagrant --gid vagrant
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Configure nginx site configuration
+```
+```
+
+Create a symbolic link
+```
+```
+
+Update nginx.conf
+```
+```
+
+Add an entry to /etc/hosts
+```
+```
+
+Test integration
+```
+curl http://app_simple.com
+```
+
+Check nginx logs after doing some requests
+```
+sudo tail -30 /var/log/nginx/error.log
 ```
 
 ### Ansible process
@@ -92,6 +189,17 @@ Reference 1
 https://github.com/hashicorp/vagrant/issues/1671
 ```
 
+Problem 2
+````
+[root@nginxServer vagrant]# sudo cat /var/log/audit/audit.log | grep nginx | grep denied
+type=AVC msg=audit(1562220943.922:4788): avc:  denied  { name_connect } for  pid=7322 comm="nginx" dest=5000 scontext=system_u:system_r:httpd_t:s0 tcontext=system_u:object_r:commplex_main_port_t:s0 tclass=tcp_socket permissive=0
+```
+
+Problem 3
+```
+2019/07/03 23:58:39 [crit] 7875#0: *34 connect() to unix:/home/vagrant/app_simple/app_simple.sock failed (13: Permission denied) while connecting to upstream, client: 127.0.0.1, server: app_simple.com, request: "GET / HTTP/1.1", upstream: "uwsgi://unix:/home/vagrant/app_simple/app_simple.sock:", host: "app_simple.com"
+```
+
 ### References
 
 * https://letsencrypt.org/
@@ -99,3 +207,14 @@ https://github.com/hashicorp/vagrant/issues/1671
 * https://docs.ansible.com/ansible/latest/modules/ec2_module.html
 * https://www.linuxschoolonline.com/use-ansible-to-build-and-manage-aws-ec2-instances/
 * https://arkit.co.in/aws-ec2-instance-creation-using-ansible/
+* http://www.mydailytutorials.com/ansible-add-line-to-file/
+* https://github.com/andreif/uwsgi-tools
+* https://uwsgi-docs.readthedocs.io/en/latest/tutorials/Django_and_nginx.html
+
+* https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-server-blocks-on-centos-7
+* https://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html
+* https://www.gab.lc/articles/flask-nginx-uwsgi/
+* https://stackoverflow.com/questions/21820444/nginx-error-13-permission-denied-while-connecting-to-upstream
+* https://stackoverflow.com/questions/23948527/13-permission-denied-while-connecting-to-upstreamnginx
+
+

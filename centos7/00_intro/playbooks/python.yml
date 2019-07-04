@@ -1,28 +1,32 @@
 ---
+# Dependencies install
 - hosts: appServer
   become: yes
   become_user: root
   become_method: sudo
   tasks:
-    - name: Install a list of packages
+    - name: Install python3
       yum:
         name:
+          - python-setuptools
           - python36
           - python36-pip
+          - python36-devel
         state: present
 
+# Application install
 - hosts: appServer
   become: yes
   become_user: vagrant
   tasks:
-    - name: Creates directory
+    - name: Create app_simple directory
       file:
         path: /home/vagrant/app_simple
         state: directory
         owner: vagrant
         group: vagrant
-        mode: u=rw,g=r,o=r
-    - name: Copy artifact
+        mode: u=rwx,g=rx,o=rx
+    - name: Copy application files into app_simple directory
       copy: 
         src: ../templates/app_simple/ 
         dest: /home/vagrant/app_simple/ 
@@ -30,42 +34,67 @@
         directory_mode: yes
         owner: vagrant
         group: vagrant
-        mode: u=rw,g=r,o=r
+        mode: u=rwx,g=rx,o=rx
+    - name: Install app_simple requirements
+      pip: 
+        requirements: /home/vagrant/app_simple/requirements.txt
+        executable: pip3
+        extra_args: --user
 
     # needs rsync
     # - synchronize: 
-    #     src: ../templates/app
+    #     src: ../templates/app_simple
     #     dest: /home/vagrant/
 
+# Systemd configuration
 - hosts: appServer
   become: yes
   become_user: root
   become_method: sudo
   tasks:
-    - name: Copy configuration
+    - name: Copy systemd configuration
       copy: 
-        src: ../templates/config/app.service
-        dest: /etc/systemd/system/app.service
+        src: ../templates/config_files/app_simple.service
+        dest: /etc/systemd/system/app_simple.service
         remote_src: no
-    - name: start app 
+    - name: start app_simple
       service:
-        name: app
+        name: app_simple
         state: started
 
-
-# /etc/nginx/sites-available/myproject
-# server {
-#     listen 80;
-#     server_name your_domain www.your_domain;
-
-#     location / {
-#         include uwsgi_params;
-#         uwsgi_pass unix:/home/sammy/myproject/myproject.sock;
-#     }
-# }
-
-# sudo ln -s /etc/nginx/sites-available/myproject /etc/nginx/sites-enabled
-
-# sudo nginx -t
-
-# sudo systemctl restart nginx
+# Nginx integration
+- hosts: appServer
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Create nginx directories
+      file:
+        path: "{{item}}"
+        state: directory
+        owner: root
+        group: root
+        mode: u=rwx,g=rx,o=rx
+      with_items:
+        - /etc/nginx/sites-available
+        - /etc/nginx/sites-enabled
+    - name: Copy nginx site configuration
+      copy: 
+        src: ../templates/config_files/app_simple.com.conf
+        dest: /etc/nginx/sites-available/app_simple.com.conf
+        remote_src: no
+    - name: Create site symbolic link 
+      file:
+        src: /etc/nginx/sites-available/app_simple.com.conf
+        dest:  /etc/nginx/sites-enabled/app_simple.com.conf
+        state: link
+    - name: validate configuration
+      command: nginx -t
+    - name: restart nginx
+      service:
+        name: nginx 
+        state: restarted
+    - name: Insert entry to hosts file for testing
+      lineinfile:
+        path: /etc/hosts
+        line: 127.0.0.1 app_simple.com
