@@ -1,0 +1,1 @@
+ansible_python_interpreter: ~/.virtualenvs/aws_deploy/bin/python3.6
