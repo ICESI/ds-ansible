@@ -12,10 +12,6 @@
       service:
         name: nginx
         state: started
-    - name: Update nginx config
-      template: src=../templates/config_files/nginx.conf
-        dest=/etc/nginx/nginx.conf
-        backup=yes
     - name: Update index page
       template: src=../templates/static/index.html
         dest=/usr/share/nginx/html/index.html

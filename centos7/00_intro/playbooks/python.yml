@@ -41,7 +41,7 @@
         executable: pip3
         extra_args: --user
 
-    # needs rsync
+    # needs rsync installed
     # - synchronize: 
     #     src: ../templates/app_simple
     #     dest: /home/vagrant/
@@ -78,6 +78,10 @@
       with_items:
         - /etc/nginx/sites-available
         - /etc/nginx/sites-enabled
+    - name: Update nginx config
+      template: src=../templates/config_files/nginx.conf
+        dest=/etc/nginx/nginx.conf
+        backup=yes
     - name: Copy nginx site configuration
       copy: 
         src: ../templates/config_files/app_simple.com.conf
@@ -98,3 +102,47 @@
       lineinfile:
         path: /etc/hosts
         line: 127.0.0.1 app_simple.com
+
+# Firewall configuration
+- hosts: appServer
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: install policycoreutils
+      yum: 
+        name: policycoreutils-python
+        state: present
+    - name: Do queries to the endpoint
+      uri:
+        url: http://app_simple.com
+        method: GET
+      ignore_errors: yes
+    - name: sleep for 10 seconds
+      wait_for: timeout=10
+    # Firewall setup 
+    - name: Transfer the script
+      copy: 
+        src: ../templates/config_files/update_firewall.sh 
+        dest: /tmp/update_firewall.sh
+        remote_src: no
+        mode: u=rwx,g=rx,o=rx
+    - name: Execute the script
+      command: sh /tmp/update_firewall.sh
+      register: sh
+    - debug: var=sh.stdout_lines
+    # Firewall setup - This is an alternative way to execute the firewall commands
+    # - name: Do queries to the endpoint
+    #   command: curl http://app_simple.com
+    # - name: Update firewall
+    #   shell: |
+    #     setenforce Permissive
+    #     grep nginx /var/log/audit/audit.log | audit2allow
+    #     restorecon -R -v /home/vagrant/app_simple/app_simple.sock
+    #     grep nginx /var/log/audit/audit.log | audit2allow -M nginx
+    #     semodule -i nginx.pp
+    #     setenforce Enforcing
+    #     exit 0
+    # Firewall setup - This is an alternative with a script task but it is not working
+    # - name: Run a script with arguments
+    #   script: /tmp/update_firewall.sh

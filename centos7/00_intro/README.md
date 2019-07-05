@@ -147,6 +147,8 @@ Check nginx logs after doing some requests
 sudo tail -30 /var/log/nginx/error.log
 ```
 
+See Problem 3 in troubleshooting section to fix the issue
+
 ### Ansible process
 
 pip install --user ansible
@@ -157,6 +159,9 @@ vagrant up
 ansible-playbook -i hosts playbooks/nginx.yml
 ansible-playbook -i hosts playbooks/python.yml
 ```
+
+### Activities
+* Create a new user instead of doing the nginx and app_simple configurations for the vagrant user
 
 ### Troubleshoot (MacOS)
 
@@ -190,7 +195,7 @@ https://github.com/hashicorp/vagrant/issues/1671
 ```
 
 Problem 2
-````
+```
 [root@nginxServer vagrant]# sudo cat /var/log/audit/audit.log | grep nginx | grep denied
 type=AVC msg=audit(1562220943.922:4788): avc:  denied  { name_connect } for  pid=7322 comm="nginx" dest=5000 scontext=system_u:system_r:httpd_t:s0 tcontext=system_u:object_r:commplex_main_port_t:s0 tclass=tcp_socket permissive=0
 ```
@@ -198,6 +203,21 @@ type=AVC msg=audit(1562220943.922:4788): avc:  denied  { name_connect } for  pid
 Problem 3
 ```
 2019/07/03 23:58:39 [crit] 7875#0: *34 connect() to unix:/home/vagrant/app_simple/app_simple.sock failed (13: Permission denied) while connecting to upstream, client: 127.0.0.1, server: app_simple.com, request: "GET / HTTP/1.1", upstream: "uwsgi://unix:/home/vagrant/app_simple/app_simple.sock:", host: "app_simple.com"
+```
+
+Solution 3
+```
+yum install policycoreutils-python
+sudo setenforce Permissive
+# to see what permissions are needed.
+sudo grep nginx /var/log/audit/audit.log | audit2allow
+# to fix misslabeled error
+restorecon -R -v /home/vagrant/app_simple/app_simple.sock
+# to create a nginx.pp policy file
+sudo grep nginx /var/log/audit/audit.log | audit2allow -M nginx
+# to apply the new policy
+sudo semodule -i nginx.pp
+sudo setenforce Enforcing
 ```
 
 ### References
@@ -210,6 +230,9 @@ Problem 3
 * http://www.mydailytutorials.com/ansible-add-line-to-file/
 * https://github.com/andreif/uwsgi-tools
 * https://uwsgi-docs.readthedocs.io/en/latest/tutorials/Django_and_nginx.html
+* https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security-enhanced_linux/sect-security-enhanced_linux-fixing_problems-allowing_access_audit2allow
+* https://docs.ansible.com/ansible/latest/modules/script_module.html
+* https://medium.com/@abhijeet.kamble619/10-things-you-should-start-using-in-your-ansible-playbook-808daff76b65
 
 * https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-server-blocks-on-centos-7
 * https://uwsgi-docs.readthedocs.io/en/latest/WSGIquickstart.html
