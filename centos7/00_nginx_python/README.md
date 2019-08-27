@@ -151,7 +151,7 @@ See Problem 3 in troubleshooting section to fix the issue
 
 ### Ansible process
 
-pip install --user ansible
+pip install --user ansible  
 pip install --user paramiko
 
 ```
