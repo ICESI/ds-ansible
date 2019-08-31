@@ -1,0 +1,2 @@
+[mirrorServer]
+192.168.56.2 ansible_ssh_user=vagrant

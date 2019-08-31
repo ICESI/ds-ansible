@@ -1,0 +1,33 @@
+---
+# Dependencies install
+- hosts: mirrorServer
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Insert entry to hosts file for testing
+      lineinfile:
+        path: /etc/hosts
+        line: 192.168.131.2 icesi.mirror.edu.co
+    - name: Copy icesi repo configuration
+      copy: 
+        src: ../templates/repo/icesi.repo
+        dest: /etc/yum.repos.d/icesi.repo
+        remote_src: no
+    - name: Run createrepo command
+      shell: yum repolist
+    - name: Upgrade all packages
+      yum:
+        name: '*'
+        state: latest
+- name: List packages and register result to print with debug later.
+  yum:
+    list: available
+    enablerepo: "icesirepo"
+    disablerepo: "*"
+  register: result
+- name: Install package with multiple repos disabled
+  yum:
+    name: nmap
+    enablerepo: "icesirepo"
+    disablerepo: "*"
