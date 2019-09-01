@@ -39,6 +39,13 @@ yum --disablerepo="*" --enablerepo="icesirepo" list available
 yum --disablerepo="*" --enablerepo="icesirepo" install nmap
 ```
 
+### Ansible
+```
+vagrant up
+ansible-playbook -i hosts playbooks/mirror.yml
+ansible-playbook -i hosts playbooks/client.yml
+```
+
 ### References
 * https://g4greetz.wordpress.com/2016/10/12/how-to-run-a-yum-update-from-a-specific-repository/
 * https://www.ostechnix.com/download-rpm-package-dependencies-centos/
