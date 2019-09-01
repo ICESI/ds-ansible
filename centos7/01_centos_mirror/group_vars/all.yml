@@ -1,0 +1,5 @@
+packages:
+  - nmap
+  - python36
+  - python36-pip
+  - postgresql

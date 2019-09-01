@@ -1,6 +1,6 @@
 ---
 # Dependencies install
-- hosts: mirrorServer
+- hosts: mirrorClient
   become: yes
   become_user: root
   become_method: sudo
@@ -16,18 +16,26 @@
         remote_src: no
     - name: Run createrepo command
       shell: yum repolist
-    - name: Upgrade all packages
+    - name: Clean all repos cache
+      shell: yum clean all
+    - name: Refresh icesi.repo
       yum:
         name: '*'
+        enablerepo: 'icesirepo'
+        disablerepo: '*'
         state: latest
-- name: List packages and register result to print with debug later.
-  yum:
-    list: available
-    enablerepo: "icesirepo"
-    disablerepo: "*"
-  register: result
-- name: Install package with multiple repos disabled
-  yum:
-    name: nmap
-    enablerepo: "icesirepo"
-    disablerepo: "*"
+    - name: List packages and register result to print with debug later.
+      yum:
+        list: available
+        enablerepo: 'icesirepo'
+        disablerepo: '*'
+      register: result
+    - name: Install packages with multiple repos disabled
+      yum:
+        name: 
+          - nmap
+          - python36
+          - python36-pip
+          - postgresql
+        enablerepo: 'icesirepo'
+        disablerepo: '*'

@@ -29,10 +29,14 @@
         src: /var/repo
         dest:  /var/www/html/repo
         state: link
-    - name: Download mirror packages 
+    - name: Install epel-release repo
       yum:
         name:
-          - nmap
+          - epel-release
+        state: latest 
+    - name: Download mirror packages 
+      yum:
+        name: "{{ packages }}"
         state: latest
         download_dir: /var/repo
         download_only: true
