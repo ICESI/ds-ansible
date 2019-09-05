@@ -33,6 +33,15 @@
     - name: Install packages with multiple repos disabled
       yum:
         name: 
-          - nmap
+          - python36
+          - python36-pip
+          - git
         enablerepo: 'icesirepo'
         disablerepo: '*'
+    # TODO: validation of the following modules
+    - git:
+        repo: https://github.com/ICESI/so-microservices-python-part2.git
+        dest: /tmp
+    - pip:
+        executable: pip3
+        name: connexion['swagger-ui']

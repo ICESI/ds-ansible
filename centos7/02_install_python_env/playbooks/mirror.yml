@@ -1,0 +1,47 @@
+---
+# Dependencies install
+- hosts: mirrorServer
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Create packages directory
+      file:
+        path: /var/repo
+        state: directory
+        owner: root
+        group: wheel
+        mode: u=rwx,g=rx,o=rx
+    - name: Install dependencies
+      yum: 
+        name: 
+          - httpd
+          - createrepo
+          - yum-plugin-downloadonly
+          - policycoreutils-python
+        state: present
+    - name: Start apache 
+      service:
+        name: httpd
+        state: started
+    - name: Create site symbolic link 
+      file:
+        src: /var/repo
+        dest:  /var/www/html/repo
+        state: link
+    - name: Install epel-release repo
+      yum:
+        name:
+          - epel-release
+        state: latest 
+    - name: Download mirror packages 
+      yum:
+        name: "{{ packages }}"
+        state: latest
+        download_dir: /var/repo
+        download_only: true
+    - name: Run createrepo command
+      shell: |
+        createrepo /var/repo/
+        semanage fcontext -a -t httpd_sys_content_t "/var/repo(/.*)?" && restorecon -rv /var/repo
+        exit 0

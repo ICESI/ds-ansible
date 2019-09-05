@@ -1,0 +1,12 @@
+---
+# Dependencies install
+- hosts: appServer
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Install nmap
+      yum:
+        name:
+          - nmap
+        state: present 
