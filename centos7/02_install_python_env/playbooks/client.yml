@@ -38,10 +38,6 @@
           - git
         enablerepo: 'icesirepo'
         disablerepo: '*'
-    # TODO: validation of the following modules
     - git:
-        repo: https://github.com/ICESI/so-microservices-python-part2.git
-        dest: /tmp
-    - pip:
-        executable: pip3
-        name: connexion['swagger-ui']
+        repo: https://github.com/ICESI/so-microservices-python.git
+        dest: /tmp/so-microservices-python
