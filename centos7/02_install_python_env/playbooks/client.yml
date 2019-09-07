@@ -38,6 +38,12 @@
           - git
         enablerepo: 'icesirepo'
         disablerepo: '*'
+
+# Repository download
+- hosts: mirrorClient
+  become: yes
+  become_user: vagrant
+  tasks:
     - git:
         repo: https://github.com/ICESI/so-microservices-python.git
         dest: /tmp/so-microservices-python
